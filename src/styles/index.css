@@ -21,12 +21,31 @@ h1 {
 .container {
     box-shadow: rgb(34, 34, 39);
 }
+.form-control{
+    font-size: 1.8rem;
+    font-family: 'sans-serif';
+}
+
 .list-group {
     background-color: white;
 }
+
+
 li {
     font-size: 1.8rem;
 }
+
+button {
+    color:  #686767;
+    background-color: white;
+    border: none;
+}
+
+span:hover {
+    text-decoration: none;
+    color: #ff6600;
+    transform: scale(1.1);
+  }
 small {
     padding: 8px 0;
     font-size: 1.2rem;
