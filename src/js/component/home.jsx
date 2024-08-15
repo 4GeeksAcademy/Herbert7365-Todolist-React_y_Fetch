@@ -10,7 +10,7 @@ const Home = () => {
 
 	const [name, setName]= useState("");
 	const [usersList, setUsersList]=useState([]);
-
+	const [userDeleted,setUserDeleted] = useState(false);
 
 	// Manejador del evento onChange del input
  	// Actualiza el estado `nuevoTodo` con el valor ingresado por el usuario
@@ -46,6 +46,7 @@ const Home = () => {
 		.then((data)=>{
 			if (data.id) {
 				alert("Usuario creado con exito")
+				setUserDeleted(prev => !prev)
 			} else {
 				alert("Upps algop salio mal")
 			}
@@ -54,20 +55,64 @@ const Home = () => {
 
 	}
 	
+	function deleteUser(){
+		fetch(`https://playground.4geeks.com/todo/users/${name}`,{
+			method: "DELETE"
+		})
+		.then((data)=>{
+			// console.log("este es la data: ", data);
+			if (data.ok){
+				alert("Usuario eliminado con exito")
+				setUserDeleted(prev => !prev)
+			}else {
+				alert("algo salio mal")
+			}
+		})
+	}
+
 	const getUsers=()=>{
 		fetch("https://playground.4geeks.com/todo/users")
-		.then((response)=>{response.json()})
-		.then((data)=>{setUsersList(data.users)})
+		.then((response)=>response.json())
+		.then((data)=>setUsersList(data.users))
 	}
 
 	useEffect(()=>{
 		getUsers()
-	},[])
+	},[userDeleted])
+
+
+	useEffect(() => {
+		console.log("info ejemplo guardadas", todos);
+	}, [todos]);
+
+	const getTasks =()=> {
+		console.log("Este es el nombre de la agenda que se esta buscando",name)
+		fetch(`https://playground.4geeks.com/todo/users/${name}`)
+		
+		.then((response)=>{
+			console.log("Este es el response",response)
+			return response.json()
+		})
+		.then((data)=> {
+			console.log("data ejemplo",data)
+			console.log("pedido de textos",data.todos)
+			if (data.todos) {
+				setTodos(data.todos)
+				
+			}
+			
+		})
+	}
+
+
+	
 
 	return (
 		<div className="text-center">
 			<input type="text" onChange={(e)=>setName(e.target.value)} />
 			<button onClick={crearUsuario}>Crear Usuario</button>
+			<button onClick={deleteUser}>Eliminar Usuario</button>
+			<button onClick={getTasks}>Obtener Tareas</button>
 			<label>Lista de usuarios</label>
 			{
 				usersList.map((item,index)=>{
@@ -76,6 +121,7 @@ const Home = () => {
 					)
 				})
 			}
+	
 			<h1 className="text-center mt-5">
 			Todos
 			</h1>
@@ -86,8 +132,8 @@ const Home = () => {
 						{/* Elementos de la lista */}
 						{todos.map((todo, indice) => {
 							return(
-								<li className="list-group-item d-flex justify-content-between align-items-center text-muted" key={indice}>
-									{todo} {" "} 
+								<li className="list-group-item d-flex justify-content-between align-items-center text-muted" key={indice} >
+									{todo.label} {" "} 
 									<button onClick={() => deleteTodo(indice)}>
 										<span> X </span>
 									</button>
