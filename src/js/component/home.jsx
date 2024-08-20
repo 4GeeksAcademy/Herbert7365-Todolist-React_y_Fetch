@@ -18,14 +18,6 @@ const Home = () => {
 		setNuevoTodo(event.target.value);
 	 }
 
-	// Función para eliminar una tarea de la lista
-	const deleteTodo = (indice) => {
-		// Filtra todos los elementos menos el que tenga el indice que recibo
-		const listaNueva = todos.filter((todo, i) => i !== indice)
-		setTodos(listaNueva);
-	}
-	// Manejador del evento onKeyDown del input
-	// Agrega una nueva tarea a la lista cuando se presiona Enter
 	const handlerEnter = (e) => {
 		if (e.key === 'Enter' && e.target.value.trim() !== '') {
 			setTodos([...todos, nuevoTodo]);
@@ -33,8 +25,6 @@ const Home = () => {
 			 setNuevoTodo("");
 		}
 	}
-
-	// ------------- FETCH ------------------------
 
 	function crearUsuario() {
 
@@ -54,7 +44,6 @@ const Home = () => {
 		.catch((error)=>console.log(error))
 
 	}
-	
 	function deleteUser(){
 		fetch(`https://playground.4geeks.com/todo/users/${name}`,{
 			method: "DELETE"
@@ -138,51 +127,56 @@ const Home = () => {
 		  console.error('Error al crear la tarea:', error);
 		  alert('Se ha producido un error inesperado. Vuelva a intentarlo más tarde.');
 		});
-	  };
-
-	  const deleteTask = (taskId) => {
-		const url = `https://playground.4geeks.com/todo/todos/${taskId}`;
-	  
-		fetch(url, {
+	};
+	
+	
+	const deleteTask = (taskId) => {
+		fetch(`https://playground.4geeks.com/todo/todos/${taskId}`, {
 		  method: 'DELETE',
 		})
-		.then(response => {
-		  if (!response.ok) {
+		.then(response => {			
+			if (!response.ok) {
 			throw new Error('Error al eliminar la tarea');
-		  }
-		  return response.json();
+		  	}
+		  	return response.status === 204 ? null : response.json();
 		})
 		.then(data => {
-		  // Actualizar el estado local para reflejar la eliminación
-		  setTodos(todos.filter(todo => todo.id !== taskId));
-		  console.log('Tarea eliminada con éxito:', data);
+			// Actualizar el estado local para reflejar la eliminación
+			if (data) {
+				// Actualizar el estado local solo si hay datos válidos
+				setTodos(todos.filter(todo => todo.id !== taskId));
+				console.log('Tarea eliminada con éxito:', data);
+			  } else {
+				console.log('Tarea eliminada con éxito (sin contenido)');
+			  }
 		})
 		.catch(error => {
-		  console.error('Error al eliminar la tarea:', error);
-		  // Mostrar un mensaje de error al usuario
-		  alert('No se pudo eliminar la tarea. Por favor, inténtalo de nuevo más tarde.');
+			console.error('Error al eliminar la tarea:', error);
+			// Mostrar un mensaje de error al usuario
+			alert('No se pudo eliminar la tarea. Por favor, inténtalo de nuevo más tarde.');
 		});
-	  };
-
-
+	};
 
 	return (
 		<div className="text-center">
-			<input type="text" onChange={(e)=>setName(e.target.value)} />
+			<form>
+			<label>
+				Pick your favorite flavor:
+				<select  onChange={(e)=>setName(e.target.value)}>
+				{usersList.map((user) => (
+					<option key={user.id} value={user.id} >
+					{user.name}
+					</option>
+				))}
+				</select>
+			</label>
+			</form>
+
+			<input type="text"  onChange={(e)=>setName(e.target.value)} />
 			<button onClick={crearUsuario}>Crear Usuario</button>
 			<button onClick={deleteUser}>Eliminar Usuario</button>
 			<button onClick={getTasks}>Obtener Tareas</button>
 			<button onClick={createTasks}>Crear Tareas</button>
-			<button onClick={deleteTask}>Eliminar Tareas</button>
-			<label>Lista de usuarios</label>
-			{
-				usersList.map((item,index)=>{
-					return(
-						<h5 key={index}>{item.name}</h5>
-					)
-				})
-			}
-	
 			<h1 className="text-center mt-5">
 			Todos
 			</h1>
@@ -191,9 +185,9 @@ const Home = () => {
 				<div className="text-left">
 					<ul className="list-group">
 						{/* Elementos de la lista */}
-						{todos.map((todo) => {
+						{todos.map((todo, indice) => {
 							return(
-								<li key={todo.id} className="list-group-item d-flex justify-content-between align-items-center text-muted" >
+								<li className="list-group-item d-flex justify-content-between align-items-center text-muted" key={todo.id} >
 									{todo.label} {" "} 
 									<button onClick={() => deleteTask(todo.id)}>
 										<span> X </span>
